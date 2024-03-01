@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: soulsync
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    networks:
+        - all
+
+  chat-api:
+    image: soulsync_chat-api
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+        - all
+    environment:
+      DB_HOST: db
+      DB_NAME: soulsync
+      DB_USER: user
+      DB_PASSWORD: password
+      OAIKEY: ${OAIKEY}
+    command: >
+        bash -c "while true; do sleep 30; done"
+
+volumes:
+  db_data:
+
+networks:
+  all:
+    driver: bridge
