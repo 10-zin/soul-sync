@@ -32,6 +32,6 @@
             ]
         }
     },
-    // "postCreateCommand": "pip install --user -r requirements.txt",
+    // "postCreateCommand": "",
     "shutdownAction": "stopCompose"
 }
