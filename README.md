@@ -1,35 +1,21 @@
 # soul-sync
 An AI wingman to sync souls across the globe.
 
-Ideally all you need to setup the server is:
-```
-docker-compose up
-```
-> Tho I am currently working on fixing some port issue in it. Once done, setting up the server should be seemeless for the front-end team.
+## Set Up
+1. [Install VS Code](https://code.visualstudio.com/)
+2. [Install Docker](https://code.visualstudio.com/docs/devcontainers/tutorial#_install-docker)
+3. [Install VS Code Dev Containers Extension](https://code.visualstudio.com/docs/devcontainers/tutorial#_install-the-extension)
+4. Clone this repository
+5. Copy `.env.example` to `.env` and fill in the necessary environment variables.
+    - Update `OPENAI_API_KEY` with your open ai api key
+6. Run
+    ```
+    python db_setup.py
+    uvicorn soul_sync_chat_api:app --host 0.0.0.0 --port 8000 --reload
+    ```
 
-
-For the time being if you wanna work with it you can setup server manually locally via:
-
-Install all dependencies with
-```
-pip install -r requirements.txt
-```
-
-MacOS: 
-Will also have to install postgresql via 
-```
-brew install postgresql
-```
-
-You will also need an OpenAI API, and export it to OAIKEY env variable
-```
-export OAIKEY=<your key>
-```
-
-Start server:
-```
-uvicorn soul_sync_chat_api:app --host 0.0.0.0 --port 8000
-```
+## Development
+- If for some reason VS code is acting up, you can always reload the window by pressing `Cmd + Shift + P` and typing `Reload Window` or `Dev Containers: Rebuild Container`
 
 To test the server:
 ```

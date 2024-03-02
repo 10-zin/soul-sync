@@ -6,24 +6,27 @@ from openai import OpenAI
 import uuid
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Database connection parameters
-DB_HOST = "localhost"
-DB_NAME = "soulsync"
-DB_USER = "10zin"
-DB_PASSWORD = ""
+DB_HOST = os.getenv("DB_HOST")
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
 USER_AI="user000"
 INIT_AI_PROMPT="Yo yO this is YouR AiWinMannn! LetS finD people to have fun with. What do you feel like doing today?"
 # System prompt to initialize the conversation context
 SYSTEM_PROMPT = "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly."
 
 # OpenAI API key
-oai_key = os.getenv("OAIKEY")
+oai_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
 # Initialize database connection pool
 db_pool = None
-
 
 @app.on_event("startup")
 async def startup_event():
@@ -42,13 +45,11 @@ async def startup_event():
 async def get_db_pool():
     return db_pool
 
-
 # Pydantic model for chat message
 class ChatMessage(BaseModel):
     text_message: str
     from_id: str
     to_id: str
-
 
 # Endpoint to receive a chat message
 @app.post("/soul_sync/ai_wingman_chat/")
