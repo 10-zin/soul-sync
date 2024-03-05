@@ -11,6 +11,7 @@ DB_HOST = os.getenv("DB_HOST")
 DB_NAME = os.getenv("DB_NAME")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_TABLE_NAME = os.getenv("DB_TABLE_NAME")
 
 
 async def create_tables():
@@ -21,8 +22,8 @@ async def create_tables():
 
     # Create the chat_messages table
     await conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS chat_messages (
+        f"""
+        CREATE TABLE IF NOT EXISTS {DB_TABLE_NAME} (
             message_id VARCHAR PRIMARY KEY,
             text_message TEXT NOT NULL,
             from_id VARCHAR NOT NULL,

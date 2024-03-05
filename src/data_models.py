@@ -1,12 +1,13 @@
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
+import os
 
 Base = declarative_base()
 
 
 class ChatMessageModel(Base):
-    __tablename__ = "chat_messages"  # Actual table name in the database
+    __tablename__ = os.getenv("DB_TABLE_NAME")  # Actual table name in the database -> chat_messages
 
     text_message = Column(String, index=True)
     from_id = Column(String, index=True)
