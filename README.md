@@ -14,6 +14,9 @@ An AI wingman to sync souls across the globe.
     uvicorn soul_sync_chat_api:app --host 0.0.0.0 --port 8000 --reload
     ```
 
+### NOTE:
+> This repo is an embarrasement to all TDD followers (incl. us). Patience is key, if we get time and interest, tests shall be added and TDD shall be followed :) Till then.. we gotta meet our asignment deadlines!
+
 ## Development
 - If for some reason VS code is acting up, you can always reload the window by pressing `Cmd + Shift + P` and typing `Reload Window` or `Dev Containers: Rebuild Container`
 
