@@ -7,11 +7,11 @@ An AI wingman to sync souls across the globe.
 3. [Install VS Code Dev Containers Extension](https://code.visualstudio.com/docs/devcontainers/tutorial#_install-the-extension)
 4. Clone this repository
 5. Copy `.env.example` to `.env` and fill in the necessary environment variables.
-    - Update `OPENAI_API_KEY` with your open ai api key
+    - Update `OPENAI_API_KEY` with your open ai api key. Make sure you add your payment details and purchase some credits to use the API. $5 should be more than enough.
 6. Run
     ```
     python db_setup.py
-    uvicorn src.soul_sync_chat_api:app --host 0.0.0.0 --pocrt 8000 --reload
+    uvicorn src.soul_sync_chat_api:app --host 0.0.0.0 --port 8000 --reload
     ```
 
 ### NOTE:
