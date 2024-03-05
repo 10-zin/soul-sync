@@ -196,5 +196,5 @@ async def get_messages(
     )
     messages = result.scalars().all()
     messages.sort(key=lambda msg: msg.time)
-    print(messages)
+
     return messages
