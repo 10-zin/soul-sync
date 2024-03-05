@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Query
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import sessionmaker
@@ -8,7 +8,7 @@ from datetime import datetime
 from openai import OpenAI
 import uuid
 import os
-from src.schemas import UserMessage, ChatMessage
+from src.schemas import InitAIMessage, UserMessage, ChatMessage
 from src.data_models import ChatMessageModel
 
 from dotenv import load_dotenv
@@ -24,6 +24,7 @@ USER_AI = "user000"
 INIT_AI_PROMPT = "Yo yO this is YouR AiWingMannn! LetS finD people to have fun with. What do you feel like doing today?"
 # System prompt to initialize the conversation context
 SYSTEM_PROMPT = "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly."
+INIT_CHAT_SYSTEM_PROMPT = "Given the conversation history, greet the user and if possible try to relate it to some conversation had before. Keep it refreshing, welcoming, and fun."
 
 # OpenAI API key
 oai_key = os.getenv("OPENAI_API_KEY")
@@ -57,7 +58,9 @@ async def get_session() -> AsyncSession:
         yield session
 
 
-async def _insert_message_in_db(message_id, text_message, from_id, to_id, time, session):
+async def _insert_message_in_db(
+    message_id, text_message, from_id, to_id, time, session
+):
     db_message = ChatMessageModel(
         message_id=message_id,
         text_message=text_message,
@@ -84,18 +87,14 @@ async def _get_user_conversation_history(message, session):
     return messages
 
 
-def _format_history_as_llm_context(messages):
-    return (
-        [{"role": "system", "content": SYSTEM_PROMPT}]
-        + [{"role": "assistant", "content": INIT_AI_PROMPT}]
-        + [
-            {
-                "role": "assistant" if msg.from_id == USER_AI else "user",
-                "content": msg.text_message,
-            }
-            for msg in messages
-        ]
-    )
+def _format_history_as_llm_context(messages, system_prompt):
+    return [{"role": "system", "content": system_prompt}] + [
+        {
+            "role": "assistant" if msg.from_id == USER_AI else "user",
+            "content": msg.text_message,
+        }
+        for msg in messages
+    ]
 
 
 def _get_llm_response(llm_context):
@@ -103,6 +102,41 @@ def _get_llm_response(llm_context):
         messages=llm_context, model="gpt-3.5-turbo"
     )
     return response.choices[0].message.content
+
+
+@app.post("/soul_sync/ai_wingman_initiate_chat/")
+async def ai_wingman_initiate_conversation(
+    message: InitAIMessage, session: AsyncSession = Depends(get_session)
+):
+
+    # Fetch conversation history
+    messages = await _get_user_conversation_history(message, session)
+    # Generate AI message based on conversation history and specific system prompt to init chat
+    llm_context = _format_history_as_llm_context(
+        messages, system_prompt=INIT_CHAT_SYSTEM_PROMPT
+    )
+    ai_wingman_message = _get_llm_response(llm_context)
+
+    # Insert AI message into database
+    ai_wingman_message_id = str(uuid.uuid4())
+    ai_wingman_message_time = datetime.now()
+    await _insert_message_in_db(
+        message_id=ai_wingman_message_id,
+        text_message=ai_wingman_message,
+        from_id=message.to_id,  # AI sends the message, so from_id is to_id from the request
+        to_id=message.from_id,  # AI message is directed to the from_id from the request
+        time=ai_wingman_message_time,
+        session=session,
+    )
+
+    # Return AI message details
+    return {
+        "message_id": ai_wingman_message_id,
+        "text_message": ai_wingman_message,
+        "from_id": message.to_id,  # AI's from_id
+        "to_id": message.from_id,  # User's to_id
+        "time": ai_wingman_message_time,
+    }
 
 
 # Endpoint to receive a chat message
@@ -118,10 +152,10 @@ async def chat(message: UserMessage, session: AsyncSession = Depends(get_session
         session=session,
     )
     messages = await _get_user_conversation_history(message, session)
-    llm_context = _format_history_as_llm_context(messages)
+    llm_context = _format_history_as_llm_context(messages, system_prompt=SYSTEM_PROMPT)
     ai_wingman_message = _get_llm_response(llm_context)
-    ai_wingman_message_id=str(uuid.uuid4())
-    ai_wingman_message_time=datetime.now()
+    ai_wingman_message_id = str(uuid.uuid4())
+    ai_wingman_message_time = datetime.now()
     await _insert_message_in_db(
         message_id=ai_wingman_message_id,
         text_message=ai_wingman_message,
@@ -138,3 +172,29 @@ async def chat(message: UserMessage, session: AsyncSession = Depends(get_session
         "to_id": message.from_id,
         "time": ai_wingman_message_time,
     }
+
+
+@app.get("/soul_sync/get_messages/")
+async def get_messages(
+    from_id: str,
+    to_id: str,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1),
+    session: AsyncSession = Depends(get_session),
+):
+    # paginated message history retreival -> for lighter traffic congestion.
+    # retreive by desc to get latest message pages, sort messages in each page in asc. to get ordered messages.
+    result = await session.execute(
+        select(ChatMessageModel)
+        .filter(
+            (ChatMessageModel.from_id == from_id) & (ChatMessageModel.to_id == to_id)
+            | (ChatMessageModel.from_id == to_id) & (ChatMessageModel.to_id == from_id)
+        )
+        .order_by(ChatMessageModel.time.desc())
+        .offset(offset)
+        .limit(limit)
+    )
+    messages = result.scalars().all()
+    messages.sort(key=lambda msg: msg.time)
+    print(messages)
+    return messages
