@@ -10,10 +10,10 @@ class UserMessage(BaseModel):
     class Config:
         orm_mode = True
 
+
 class ChatMessage(UserMessage):
     message_id: str
     time: datetime
+
     class Config:
         orm_mode = True
-
-

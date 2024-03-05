@@ -4,8 +4,9 @@ from datetime import datetime
 
 Base = declarative_base()
 
+
 class ChatMessageModel(Base):
-    __tablename__ = 'chat_messages'  # Actual table name in the database
+    __tablename__ = "chat_messages"  # Actual table name in the database
 
     text_message = Column(String, index=True)
     from_id = Column(String, index=True)
