@@ -11,7 +11,7 @@ An AI wingman to sync souls across the globe.
 6. Run
     ```
     python db_setup.py
-    uvicorn soul_sync_chat_api:app --host 0.0.0.0 --port 8000 --reload
+    uvicorn src.soul_sync_chat_api:app --host 0.0.0.0 --pocrt 8000 --reload
     ```
 
 ### NOTE:
