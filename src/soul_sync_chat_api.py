@@ -129,7 +129,7 @@ async def ai_wingman_initiate_conversation(
     #     messages, system_prompt=SYSTEM_PROMPT
     # )
     # ai_wingman_message = _get_llm_response(llm_context)
-    ai_wingman_message = f"Hello, {USER_NAME}! {PREDEFINED_QUESTIONS}",
+    ai_wingman_message = f"Hello, {USER_NAME}! {PREDEFINED_QUESTIONS}"
 
     # Insert AI message into database
     ai_wingman_message_id = str(uuid.uuid4())
