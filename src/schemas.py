@@ -25,16 +25,22 @@ class UserUpdate(UserBase):
 class User(UserBase):
     id: UUID
     is_active: bool
+    profile: Optional['UserProfile'] = None
     ai_wingman: 'AIWingman'
     participant: 'Participant'
+    questions_asked: List['QuestionAsked'] = []
     
     class Config:
         orm_mode = True
 
 class UserProfileBase(BaseModel):
-    bio: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    occupation: Optional[str] = None
     interests: Optional[str] = None
-    preferences: Optional[str] = None
+    age: Optional[int] = None
+    location: Optional[str] = None
+    bio: Optional[str] = None
 
 class UserProfileCreate(UserProfileBase):
     pass
@@ -68,10 +74,15 @@ class ParticipantCreate(ParticipantBase):
     user_id: Optional[UUID] = None
     ai_wingman_id: Optional[UUID] = None
 
-class Participant(ParticipantBase):
+class ParticipantInConversation(ParticipantBase):
     id: UUID
     user_id: Optional[UUID] = None
     ai_wingman_id: Optional[UUID] = None
+    
+    class Config:
+        orm_mode = True
+
+class Participant(ParticipantInConversation):
     conversations: List['Conversation']
 
     class Config:
@@ -102,14 +113,17 @@ class ConversationCreate(ConversationBase):
 class Conversation(ConversationBase):
     id: UUID
     created_at: datetime
-    participants: List[Participant]
     messages: List[Message]
+    participants: List[ParticipantInConversation] = []
 
     class Config:
         orm_mode = True
 
+
+# Schema for Question model
 class QuestionBase(BaseModel):
     content: str
+    frequency_days: int = 0
 
 class QuestionCreate(QuestionBase):
     pass
@@ -117,6 +131,18 @@ class QuestionCreate(QuestionBase):
 class Question(QuestionBase):
     id: UUID
     created_at: datetime
+    class Config:
+        orm_mode = True
 
+# Schema for QuestionAsked model
+class QuestionAskedBase(BaseModel):
+    asked_at: datetime
+    user_id: UUID
+    question_id: UUID
+    conversation_id: UUID
+
+class QuestionAskedCreate(QuestionAskedBase):
+    pass
+class QuestionAsked(QuestionAskedBase):
     class Config:
         orm_mode = True

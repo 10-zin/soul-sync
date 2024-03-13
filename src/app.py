@@ -29,6 +29,12 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+# TODO:
+# Update system prompt
+# Add more questions 
+# Write automated api test
+# Clean up 
+# Deploy
 
 def get_db():
     db = SessionLocal()
@@ -66,11 +72,11 @@ def get_current_user(
         raise credentials_exception
     return user
 
-
+# TODO: Use Transactions
 def signup_user(db: Session, user_data: schemas.UserCreate):
-    user = crud.create_user(db=db, user=user_data)
+    db_user = crud.create_user(db=db, user=user_data)
     # Create a Participant for user
-    db_user_participant = crud.create_participant(db, user_id=user.id)
+    db_user_participant = crud.create_participant(db, user_id=db_user.id)
     # Create a AI Wingman for user
     ai_wingman = crud.create_ai_wingman(
         db, schemas.AIWingmanCreate(level=1, knowledge="")
@@ -78,14 +84,14 @@ def signup_user(db: Session, user_data: schemas.UserCreate):
     # Create a Participant for AI Wingman
     db_ai_wingman_participant = crud.create_participant(db, ai_wingman_id=ai_wingman.id)
     # Update user with AI Wingman ID
-    user.ai_wingman_id = ai_wingman.id
-    user = crud.update_user(
+    db_user.ai_wingman_id = ai_wingman.id
+    db_user = crud.update_user(
         db,
-        user.id,
+        db_user.id,
         schemas.UserUpdate(
-            username=user.username,
-            email=user.email,
-            ai_wingman_id=user.ai_wingman_id,
+            username=db_user.username,
+            email=db_user.email,
+            ai_wingman_id=db_user.ai_wingman_id,
             password=user_data.password,
         ),
     )
@@ -103,7 +109,7 @@ def signup_user(db: Session, user_data: schemas.UserCreate):
             level=1, knowledge="", conversation_id_user_default=db_conversation.id
         ),
     )
-    return user
+    return db_user
 
 
 @app.post("/token")
@@ -135,8 +141,12 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Username already registered")
     return signup_user(db, user)
 
+@app.post("/user_profiles", response_model=schemas.UserProfile)
+def create_user_profile(user_profile: schemas.UserProfileCreate, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user),):
+    db_user_profile = crud.create_user_profile(db, user_profile, user_id=current_user.id)
+    return db_user_profile
 
-@app.post("/soul_sync/ai_wingman_initiate_conversation")
+@app.get("/soul_sync/ai_wingman_initiate_conversation")
 async def ai_wingman_initiate_conversation(
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user),
@@ -147,8 +157,8 @@ async def ai_wingman_initiate_conversation(
     db_ai_wingman_participant = crud.get_participant_by_ai_wingman_id(
         db, ai_wingman_id=current_user.ai_wingman_id
     )
-    # Pick a random question to return
-    question = QUESTIONS[random.randint(0, len(QUESTIONS) - 1)]
+    
+    question = f"Hello, {current_user.profile.first_name}! {QUESTIONS[random.randint(0, len(QUESTIONS) - 1)]}"
     db_message = crud.create_message(
         db,
         schemas.MessageCreate(
@@ -165,7 +175,6 @@ async def ai_wingman_initiate_conversation(
         "sender_id": db_ai_wingman_participant.id,
         "time": db_message.created_at,
     }
-
 
 class AIWingmanConversationInput(BaseModel):
     conversation_id: str
@@ -193,7 +202,8 @@ async def ai_wingman_conversation(
     db_messages.sort(key=lambda x: x.created_at)
     ai_message_content = get_ai_response(
         db_messages,
-        db_ai_wingman_participant_id
+        db_ai_wingman_participant_id,
+        current_user,
     )
     db_ai_message = crud.create_message(
         db,

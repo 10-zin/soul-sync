@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import enum
 import uuid
 from sqlalchemy import UUID, Boolean, Column, Integer, String, Text, DateTime, ForeignKey, Table, Enum
@@ -45,19 +46,24 @@ class User(Base):
     ai_wingman = relationship("AIWingman", back_populates="user")
 
     profile = relationship("UserProfile", back_populates="user", uselist=False)
-    
     participant = relationship("Participant", back_populates="user", uselist=False)
+    questions_asked = relationship("QuestionAsked", back_populates="user")
 
 class UserProfile(Base):
     __tablename__ = "user_profiles"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), unique=True)
-    bio = Column(Text)
+    
+    first_name = Column(String)
+    last_name = Column(String)
+    occupation = Column(String)
     interests = Column(Text)
-    preferences = Column(Text)
+    age = Column(Integer)
+    location = Column(String)
+    bio = Column(Text)
 
-    user = relationship("User", back_populates="profile")
+    user = relationship("User", back_populates="profile", uselist=False)
 
 class AIWingman(Base):
     __tablename__ = "ai_wingmen"
@@ -86,7 +92,7 @@ class Message(Base):
     conversation_id = Column(UUID(as_uuid=True), ForeignKey("conversations.id"))
     conversation = relationship("Conversation", back_populates="messages")
     content = Column(Text)
-    created_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
     sender_id = Column(UUID(as_uuid=True), ForeignKey("participants.id"))
     sender = relationship("Participant", back_populates="messages")
@@ -97,4 +103,20 @@ class Question(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
     content = Column(Text)
-    created_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    
+    frequency_days = Column(Integer, default=1)
+    
+    instances = relationship("QuestionAsked", back_populates="question")
+    
+    
+class QuestionAsked(Base):
+    __tablename__ = 'questions_asked'
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), primary_key=True)
+    question_id = Column(UUID(as_uuid=True), ForeignKey('questions.id'), primary_key=True)
+    conversation_id = Column(UUID(as_uuid=True), ForeignKey('conversations.id'), primary_key=True)
+    asked_at = Column(DateTime, default=datetime.now(timezone.utc))
+
+    user = relationship("User", back_populates="questions_asked")
+    question = relationship("Question", back_populates="instances")
+    

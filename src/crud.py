@@ -3,7 +3,7 @@ from uuid import UUID
 
 from src.auth import hash_password
 from . import models, schemas
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def commit_changes(db: Session, db_item):
@@ -65,11 +65,10 @@ def delete_user(db: Session, user_id: UUID):
 
 def create_user_profile(db: Session, profile: schemas.UserProfileCreate, user_id: UUID):
     db_profile = models.UserProfile(**profile.model_dump(), user_id=user_id)
-    db.add(db_profile)
-    db.commit()
-    db.refresh(db_profile)
-    return db_profile
+    return commit_changes(db, db_profile)
 
+def get_user_profile(db: Session, user_id: UUID):
+    return db.query(models.UserProfile).filter(models.UserProfile.user_id == user_id).first()
 
 def create_ai_wingman(db: Session, ai_wingman: schemas.AIWingmanCreate):
     db_ai_wingman = models.AIWingman(**ai_wingman.model_dump())
@@ -112,7 +111,7 @@ def get_conversations_by_participant_id(
 
 
 def create_conversation(db: Session, conversation: schemas.ConversationCreate):
-    db_conversation = models.Conversation(created_at=datetime.now())
+    db_conversation = models.Conversation(created_at=datetime.now(timezone.utc))
     db.add(db_conversation)
     db.commit()
     db.refresh(db_conversation)
@@ -137,7 +136,7 @@ def get_messages(db: Session, conversation_id: UUID, skip: int = 0, limit: int =
     )
 
 def create_message(db: Session, message: schemas.MessageCreate):
-    db_message = models.Message(**message.model_dump(), created_at=datetime.now())
+    db_message = models.Message(**message.model_dump(), created_at=datetime.now(timezone.utc))
     return commit_changes(db, db_message)
 
 
