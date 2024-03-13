@@ -9,7 +9,7 @@ from openai import OpenAI
 import uuid
 import os
 from src.schemas import InitAIMessage, UserMessage, ChatMessage
-from src.data_models import ChatMessageModel
+from v0.data_models import ChatMessageModel
 
 from dotenv import load_dotenv
 

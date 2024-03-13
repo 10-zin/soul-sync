@@ -1,0 +1,100 @@
+import enum
+import uuid
+from sqlalchemy import UUID, Boolean, Column, Integer, String, Text, DateTime, ForeignKey, Table, Enum
+from sqlalchemy.orm import relationship
+
+from .database import Base
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+
+# Define the association table for conversations and participants
+conversation_participant_association = Table(
+    'conversation_participant_association', Base.metadata,
+    Column('conversation_id', UUID(as_uuid=True), ForeignKey('conversations.id')),
+    Column('participant_id', UUID(as_uuid=True), ForeignKey('participants.id'))
+)
+
+class ParticipantType(enum.Enum):
+    human = "user"
+    ai = "ai"
+
+class Participant(Base):
+    __tablename__ = 'participants'
+
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
+    type = Column(Enum(ParticipantType))  # Could be 'user' or 'ai_wingman'
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=True)
+    user = relationship("User", back_populates="participant", uselist=False)
+    ai_wingman_id = Column(UUID(as_uuid=True), ForeignKey('ai_wingmen.id'), nullable=True)
+    ai_wingman = relationship("AIWingman", back_populates="participant", uselist=False)
+    conversations = relationship("Conversation", secondary="conversation_participant_association", back_populates="participants")
+    messages = relationship("Message", back_populates="sender")
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
+    username = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    is_active = Column(Boolean, default=True)
+    
+    ai_wingman_id = Column(UUID(as_uuid=True), ForeignKey('ai_wingmen.id'))
+    ai_wingman = relationship("AIWingman", back_populates="user")
+
+    profile = relationship("UserProfile", back_populates="user", uselist=False)
+    
+    participant = relationship("Participant", back_populates="user", uselist=False)
+
+class UserProfile(Base):
+    __tablename__ = "user_profiles"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), unique=True)
+    bio = Column(Text)
+    interests = Column(Text)
+    preferences = Column(Text)
+
+    user = relationship("User", back_populates="profile")
+
+class AIWingman(Base):
+    __tablename__ = "ai_wingmen"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
+    level = Column(Integer, default=1)
+    knowledge = Column(Text)  # JSON or similar format to store what it learns about the user
+    conversation_id_user_default = Column(UUID(as_uuid=True), ForeignKey("conversations.id"))
+    
+    user = relationship("User", back_populates="ai_wingman", uselist=False)
+    participant = relationship("Participant", back_populates="ai_wingman", uselist=False)
+
+class Conversation(Base):
+    __tablename__ = "conversations"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
+    created_at = Column(DateTime)
+
+    messages = relationship("Message", back_populates="conversation")
+    participants = relationship("Participant", secondary=conversation_participant_association, back_populates="conversations")
+
+class Message(Base):
+    __tablename__ = "messages"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
+    conversation_id = Column(UUID(as_uuid=True), ForeignKey("conversations.id"))
+    conversation = relationship("Conversation", back_populates="messages")
+    content = Column(Text)
+    created_at = Column(DateTime)
+
+    sender_id = Column(UUID(as_uuid=True), ForeignKey("participants.id"))
+    sender = relationship("Participant", back_populates="messages")
+    
+    
+class Question(Base):
+    __tablename__ = "questions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
+    content = Column(Text)
+    created_at = Column(DateTime)
