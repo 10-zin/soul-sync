@@ -34,7 +34,9 @@ alembic upgrade head
 This command applies all pending migrations to the database.
 
 ## Development
-- If for some reason VS code is acting up, you can always reload the window by pressing `Cmd + Shift + P` and typing `Reload Window` or `Dev Containers: Rebuild Container`
+- If for some reason VS code is acting up, you can always reload the window by pressing `Cmd + Shift + P` and typing `Reload Window` or `Dev Containers: Rebuild Container`.
+
+API documentation is available at http://127.0.0.1:8000/docs once you start the server.
 
 To test the server:
 
