@@ -144,5 +144,7 @@ class QuestionAskedBase(BaseModel):
 class QuestionAskedCreate(QuestionAskedBase):
     pass
 class QuestionAsked(QuestionAskedBase):
+    id: UUID
+    
     class Config:
         orm_mode = True

@@ -1,10 +1,12 @@
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 import random
 from typing import Annotated, List
 from uuid import UUID
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
+from sqlalchemy import and_, func, or_
+from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import Session
 
 
@@ -18,7 +20,7 @@ from .auth import (
     oauth2_scheme,
 )
 from .database import SessionLocal, engine
-from .questions import QUESTIONS
+from .questions import populate_questions
 from .llm import get_ai_response
 
 from fastapi import Depends, HTTPException, status
@@ -27,14 +29,20 @@ from jose import JWTError, jwt
 
 models.Base.metadata.create_all(bind=engine)
 
+# Call the function to populate questions right after the tables are created
+def populate_initial_data():
+    db = SessionLocal()
+    try:
+        populate_questions(db)
+    finally:
+        db.close()
+
+populate_initial_data()
+
 app = FastAPI()
 
 # TODO:
-# Update system prompt
-# Add more questions 
 # Write automated api test
-# Clean up 
-# Deploy
 
 def get_db():
     db = SessionLocal()
@@ -151,35 +159,64 @@ async def ai_wingman_initiate_conversation(
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user),
 ):
-    db_ai_wingman: models.AIWingman = crud.get_ai_wingman(
-        db, ai_wingman_id=current_user.ai_wingman_id
-    )
-    db_ai_wingman_participant = crud.get_participant_by_ai_wingman_id(
-        db, ai_wingman_id=current_user.ai_wingman_id
-    )
+    if current_user.profile is None:
+        raise HTTPException(status_code=400, detail="User profile not found")
+
+    conversation_id = current_user.ai_wingman.conversation_id_user_default
+    ai_wingman_participant_id = current_user.ai_wingman.participant.id
     
-    question = f"Hello, {current_user.profile.first_name}! {QUESTIONS[random.randint(0, len(QUESTIONS) - 1)]}"
+    # Find all QuestionAsked to the user over the past 60 days
+    sixty_days_ago = datetime.now(timezone.utc) - timedelta(days=60)
+    recent_questions = db.query(models.QuestionAsked.question_id).filter(
+        and_(
+            models.QuestionAsked.user_id == current_user.id,
+            models.QuestionAsked.asked_at >= sixty_days_ago
+        )
+    ).subquery()
+
+    # Find all questions that are not in the recently asked list
+    available_questions = db.query(models.Question).filter(
+        ~models.Question.id.in_(recent_questions),
+    ).all()
+    
+    if not available_questions:
+        raise HTTPException(status_code=404, detail="No new questions available")
+    
+    # Randomly select a question to ask
+    question = random.choice(available_questions)
+    formatted_question = f"Hello, {current_user.profile.first_name}! {question.content}"
+    
+    # Create a new message with the selected question
     db_message = crud.create_message(
         db,
         schemas.MessageCreate(
-            conversation_id=db_ai_wingman.conversation_id_user_default,
-            sender_id=db_ai_wingman_participant.id,
-            content=question,
+            conversation_id=conversation_id,
+            sender_id=ai_wingman_participant_id,
+            content=formatted_question,
         ),
     )
+    
+    # Record the question asked in QuestionAsked
+    db_question_asked = models.QuestionAsked(
+        user_id=current_user.id,
+        question_id=question.id,
+        conversation_id=conversation_id,
+        asked_at=datetime.now(timezone.utc)
+    )
+    db.add(db_question_asked)
+    db.commit()
 
     return {
-        "conversation_id": db_ai_wingman.conversation_id_user_default,
+        "conversation_id": conversation_id,
         "message_id": db_message.id,
-        "text_message": question,
-        "sender_id": db_ai_wingman_participant.id,
+        "text_message": formatted_question,
+        "sender_id": ai_wingman_participant_id,
         "time": db_message.created_at,
     }
 
 class AIWingmanConversationInput(BaseModel):
     conversation_id: str
     content: str
-
 
 @app.post("/soul_sync/ai_wingman_conversation")
 async def ai_wingman_conversation(
@@ -289,3 +326,7 @@ def read_messages(
         db, conversation_id=conversation_id, skip=skip, limit=limit
     )
     return messages
+
+@app.get("/health")
+def health_check():
+    return {"status": "OK"}

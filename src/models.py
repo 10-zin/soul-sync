@@ -112,9 +112,10 @@ class Question(Base):
     
 class QuestionAsked(Base):
     __tablename__ = 'questions_asked'
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), primary_key=True)
-    question_id = Column(UUID(as_uuid=True), ForeignKey('questions.id'), primary_key=True)
-    conversation_id = Column(UUID(as_uuid=True), ForeignKey('conversations.id'), primary_key=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'))
+    question_id = Column(UUID(as_uuid=True), ForeignKey('questions.id'))
+    conversation_id = Column(UUID(as_uuid=True), ForeignKey('conversations.id'))
     asked_at = Column(DateTime, default=datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="questions_asked")

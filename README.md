@@ -60,7 +60,7 @@ curl -X POST -F 'username=ray' -F 'password=password' http://localhost:8000/toke
 
 ### To Start a Conversation with AI Wingman
 ```bash
-curl -X POST -H 'Authorization: Bearer your_access_token_here' http://localhost:8000/soul_sync/ai_wingman_initiate_conversation
+curl -X GET -H 'Authorization: Bearer your_access_token_here' http://localhost:8000/soul_sync/ai_wingman_initiate_conversation
 ```
 
 ### To Add User Message to a Conversation with AI Wingman
@@ -93,3 +93,12 @@ curl -X 'GET' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer your_access_token_here'
 ```
+
+
+## Deployment
+### To build the image
+Remember to update the tag to the latest version.
+`docker build --platform=linux/amd64 -t docker.io/ruizehung/soulsync:v1.1 .`
+
+### To push the image
+`docker push docker.io/ruizehung/soulsync:v1.1`
