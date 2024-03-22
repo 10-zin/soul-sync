@@ -154,6 +154,11 @@ def create_user_profile(user_profile: schemas.UserProfileCreate, db: Session = D
     db_user_profile = crud.create_user_profile(db, user_profile, user_id=current_user.id)
     return db_user_profile
 
+@app.get("/user_profiles", response_model=schemas.UserProfile)
+def create_user_profile(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user),):
+    db_user_profile = crud.get_user_profile(db, user_id=current_user.id)
+    return db_user_profile
+
 @app.get("/soul_sync/ai_wingman_initiate_conversation")
 async def ai_wingman_initiate_conversation(
     db: Session = Depends(get_db),
