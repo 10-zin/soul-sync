@@ -32,6 +32,15 @@ class User(UserBase):
     
     class Config:
         orm_mode = True
+        
+class UserAdminResponse(UserBase):
+    id: UUID
+    is_active: bool
+    profile: Optional['UserProfile'] = None
+    ai_wingman: 'AIWingman'
+    participant: 'ParticipantInConversation'
+    class Config:
+        orm_mode = True
 
 class UserProfileBase(BaseModel):
     first_name: Optional[str] = None
@@ -62,7 +71,7 @@ class AIWingmanCreate(AIWingmanBase):
 
 class AIWingman(AIWingmanBase):
     id: UUID
-    participant: 'Participant'
+    participant: 'ParticipantInConversation'
 
     class Config:
         orm_mode = True

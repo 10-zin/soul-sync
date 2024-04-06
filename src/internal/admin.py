@@ -18,11 +18,11 @@ router = APIRouter(
     dependencies=[Depends(admin_api_token_auth)]
 )
 
-@router.get("/users")
+@router.get("/users", response_model=list[schemas.UserAdminResponse])
 async def get_users(db: Session = Depends(get_db)):
     return crud.get_users(db)
 
-@router.get("/users/{user_id}")
+@router.get("/users/{user_id}", response_model=schemas.UserAdminResponse)
 async def get_users(user_id: str, db: Session = Depends(get_db)):
     return crud.get_user(db, user_id)
 

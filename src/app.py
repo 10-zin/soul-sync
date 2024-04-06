@@ -21,8 +21,7 @@ from .auth import (
     verify_password,
     oauth2_scheme,
 )
-from .database import SessionLocal, engine, get_db
-from .questions import populate_questions
+from .database import engine, get_db
 from .llm import get_ai_response
 
 from fastapi import Depends, HTTPException, status
