@@ -144,7 +144,7 @@ def create_user_profile(user_profile: schemas.UserProfileCreate, db: Session = D
     return db_user_profile
 
 @app.get("/user_profiles", response_model=schemas.UserProfile)
-def create_user_profile(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user),):
+def get_user_profile(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user),):
     db_user_profile = crud.get_user_profile(db, user_id=current_user.id)
     return db_user_profile
 
