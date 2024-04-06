@@ -135,6 +135,14 @@ def get_messages(db: Session, conversation_id: UUID, skip: int = 0, limit: int =
         .all()
     )
 
+def count_messages_after_timestamp_in_conversation(db: Session, conversation_id: UUID, timestamp: datetime):
+    return (
+        db.query(models.Message)
+        .filter(models.Message.conversation_id == conversation_id)
+        .filter(models.Message.created_at >= timestamp)
+        .count()
+    )
+
 def create_message(db: Session, message: schemas.MessageCreate):
     db_message = models.Message(**message.model_dump(), created_at=datetime.now(timezone.utc))
     return commit_changes(db, db_message)
@@ -169,3 +177,36 @@ def get_participant_by_ai_wingman_id(db: Session, ai_wingman_id: UUID):
         .filter(models.Participant.ai_wingman_id == ai_wingman_id)
         .first()
     )
+    
+def get_question_asked_instances(db: Session, question_id: UUID):
+    return db.query(models.QuestionAsked).filter(models.QuestionAsked.question_id == question_id).all()
+    
+def get_latest_question_asked_to_user(db: Session, user_id: UUID):
+    return (
+        db.query(models.QuestionAsked)
+        .filter(models.QuestionAsked.user_id == user_id)
+        .order_by(models.QuestionAsked.asked_at.desc())
+        .first()
+    )
+    
+def update_question_asked_with_message_count(db: Session, question_asked_id: UUID, messages_count: int):
+    db_question_asked: models.QuestionAsked = get_item_by_id(db, models.QuestionAsked, question_asked_id)
+    if db_question_asked:
+        db_question_asked.messages_count = messages_count
+        db.commit()
+        db.refresh(db_question_asked)
+    return db_question_asked
+
+def get_questions(db: Session):
+    return db.query(models.Question).all()
+
+def add_question(db: Session, question: schemas.QuestionCreate):
+    db_question = models.Question(**question.model_dump())
+    return commit_changes(db, db_question)
+
+def remove_question(db: Session, question_id: UUID):
+    db_question = get_item_by_id(db, models.Question, question_id)
+    if db_question:
+        db.delete(db_question)
+        db.commit()
+    return db_question

@@ -32,6 +32,6 @@
             ]
         }
     },
-    // "postCreateCommand": "",
+    "postCreateCommand": "pip install -r requirements-dev.txt",
     "shutdownAction": "stopCompose"
 }

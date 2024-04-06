@@ -9,6 +9,8 @@ from sqlalchemy import and_, func, or_
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import Session
 
+from .internal import admin
+
 
 from . import models, schemas, crud
 from .auth import (
@@ -19,7 +21,7 @@ from .auth import (
     verify_password,
     oauth2_scheme,
 )
-from .database import SessionLocal, engine
+from .database import SessionLocal, engine, get_db
 from .questions import populate_questions
 from .llm import get_ai_response
 
@@ -29,27 +31,14 @@ from jose import JWTError, jwt
 
 models.Base.metadata.create_all(bind=engine)
 
-# Call the function to populate questions right after the tables are created
-def populate_initial_data():
-    db = SessionLocal()
-    try:
-        populate_questions(db)
-    finally:
-        db.close()
-
-populate_initial_data()
-
 app = FastAPI()
+app.include_router(
+    admin.router,
+    prefix="/admin",
+)
 
 # TODO:
 # Write automated api test
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 def authenticate_user(db: Session, username: str, password: str):
@@ -169,6 +158,12 @@ async def ai_wingman_initiate_conversation(
 
     conversation_id = current_user.ai_wingman.conversation_id_user_default
     ai_wingman_participant_id = current_user.ai_wingman.participant.id
+    
+    # Find the last question asked to this user
+    latest_question_asked_to_user = crud.get_latest_question_asked_to_user(db, current_user.id)
+    if latest_question_asked_to_user:
+        latest_question_asked_to_user.messages_count = crud.count_messages_after_timestamp_in_conversation(db, conversation_id, latest_question_asked_to_user.asked_at) 
+        crud.update_question_asked_with_message_count(db, latest_question_asked_to_user)
     
     # Find all QuestionAsked to the user over the past 60 days
     sixty_days_ago = datetime.now(timezone.utc) - timedelta(days=60)

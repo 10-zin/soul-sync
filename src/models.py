@@ -121,3 +121,5 @@ class QuestionAsked(Base):
     user = relationship("User", back_populates="questions_asked")
     question = relationship("Question", back_populates="instances")
     
+    messages_count = Column(Integer, default=0, nullable=False)
+    
