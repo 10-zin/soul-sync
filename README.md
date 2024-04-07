@@ -103,9 +103,9 @@ curl -X GET "http://localhost:8000/ai_wingman_matches" \
 ```    
 
 ### To get user profile data
-
+`<user_id>`s will be returned in the list of candidate profiles via the `"/ai_wingman_matches"` api
 ```bash
-curl -X GET "http://localhost:8000/user-profiles/113c1cf4-8573-42cf-a97a-7772d09306b2"
+curl -X GET "http://localhost:8000/user-profiles/<user_id>"
 ```
 
 ## Deployment
