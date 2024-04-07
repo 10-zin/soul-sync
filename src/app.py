@@ -162,7 +162,7 @@ async def ai_wingman_initiate_conversation(
     latest_question_asked_to_user = crud.get_latest_question_asked_to_user(db, current_user.id)
     if latest_question_asked_to_user:
         latest_question_asked_to_user.messages_count = crud.count_messages_after_timestamp_in_conversation(db, conversation_id, latest_question_asked_to_user.asked_at) 
-        crud.update_question_asked_with_message_count(db, latest_question_asked_to_user)
+        crud.update_question_asked_with_message_count(db, latest_question_asked_to_user.id, latest_question_asked_to_user.messages_count)
     
     # Find all QuestionAsked to the user over the past 60 days
     sixty_days_ago = datetime.now(timezone.utc) - timedelta(days=60)
