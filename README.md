@@ -94,6 +94,19 @@ curl -X 'GET' \
   -H 'Authorization: Bearer your_access_token_here'
 ```
 
+### To get ai wingman matches
+
+```bash
+curl -X GET "http://localhost:8000/ai_wingman_matches" \
+     -H "Accept: application/json" \
+     -H "Authorization: Bearer your_access_token_here"
+```    
+
+### To get user profile data
+
+```bash
+curl -X GET "http://localhost:8000/user-profiles/113c1cf4-8573-42cf-a97a-7772d09306b2"
+```
 
 ## Deployment
 ### To build the image
@@ -102,3 +115,4 @@ Remember to update the tag to the latest version.
 
 ### To push the image
 `docker push docker.io/ruizehung/soulsync:v1.2`
+
