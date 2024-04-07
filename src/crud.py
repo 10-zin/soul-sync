@@ -67,8 +67,22 @@ def create_user_profile(db: Session, profile: schemas.UserProfileCreate, user_id
     db_profile = models.UserProfile(**profile.model_dump(), user_id=user_id)
     return commit_changes(db, db_profile)
 
+
 def get_user_profile(db: Session, user_id: UUID):
-    return db.query(models.UserProfile).filter(models.UserProfile.user_id == user_id).first()
+    return (
+        db.query(models.UserProfile)
+        .filter(models.UserProfile.user_id == user_id)
+        .first()
+    )
+
+
+def get_all_user_profiles_except_current(db: Session, current_user_id: int):
+    return (
+        db.query(models.UserProfile)
+        .filter(models.UserProfile.user_id != current_user_id)
+        .all()
+    )
+
 
 def create_ai_wingman(db: Session, ai_wingman: schemas.AIWingmanCreate):
     db_ai_wingman = models.AIWingman(**ai_wingman.model_dump())
@@ -96,6 +110,7 @@ def get_ai_wingman(db: Session, ai_wingman_id: UUID):
 
 def get_conversation_by_id(db: Session, conversation_id: UUID):
     return get_item_by_id(db, models.Conversation, conversation_id)
+
 
 def get_conversations_by_participant_id(
     db: Session, participant_id: UUID, skip: int = 0, limit: int = 100
@@ -135,7 +150,10 @@ def get_messages(db: Session, conversation_id: UUID, skip: int = 0, limit: int =
         .all()
     )
 
-def count_messages_after_timestamp_in_conversation(db: Session, conversation_id: UUID, timestamp: datetime):
+
+def count_messages_after_timestamp_in_conversation(
+    db: Session, conversation_id: UUID, timestamp: datetime
+):
     return (
         db.query(models.Message)
         .filter(models.Message.conversation_id == conversation_id)
@@ -143,8 +161,11 @@ def count_messages_after_timestamp_in_conversation(db: Session, conversation_id:
         .count()
     )
 
+
 def create_message(db: Session, message: schemas.MessageCreate):
-    db_message = models.Message(**message.model_dump(), created_at=datetime.now(timezone.utc))
+    db_message = models.Message(
+        **message.model_dump(), created_at=datetime.now(timezone.utc)
+    )
     return commit_changes(db, db_message)
 
 
@@ -177,10 +198,16 @@ def get_participant_by_ai_wingman_id(db: Session, ai_wingman_id: UUID):
         .filter(models.Participant.ai_wingman_id == ai_wingman_id)
         .first()
     )
-    
+
+
 def get_question_asked_instances(db: Session, question_id: UUID):
-    return db.query(models.QuestionAsked).filter(models.QuestionAsked.question_id == question_id).all()
-    
+    return (
+        db.query(models.QuestionAsked)
+        .filter(models.QuestionAsked.question_id == question_id)
+        .all()
+    )
+
+
 def get_latest_question_asked_to_user(db: Session, user_id: UUID):
     return (
         db.query(models.QuestionAsked)
@@ -188,21 +215,29 @@ def get_latest_question_asked_to_user(db: Session, user_id: UUID):
         .order_by(models.QuestionAsked.asked_at.desc())
         .first()
     )
-    
-def update_question_asked_with_message_count(db: Session, question_asked_id: UUID, messages_count: int):
-    db_question_asked: models.QuestionAsked = get_item_by_id(db, models.QuestionAsked, question_asked_id)
+
+
+def update_question_asked_with_message_count(
+    db: Session, question_asked_id: UUID, messages_count: int
+):
+    db_question_asked: models.QuestionAsked = get_item_by_id(
+        db, models.QuestionAsked, question_asked_id
+    )
     if db_question_asked:
         db_question_asked.messages_count = messages_count
         db.commit()
         db.refresh(db_question_asked)
     return db_question_asked
 
+
 def get_questions(db: Session):
     return db.query(models.Question).all()
+
 
 def add_question(db: Session, question: schemas.QuestionCreate):
     db_question = models.Question(**question.model_dump())
     return commit_changes(db, db_question)
+
 
 def remove_question(db: Session, question_id: UUID):
     db_question = get_item_by_id(db, models.Question, question_id)
