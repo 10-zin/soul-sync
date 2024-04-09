@@ -10,15 +10,14 @@ ADMIN_API_TOKEN = os.getenv("ADMIN_API_TOKEN")
 
 HEADERS = {"Authorization": f"token {ADMIN_API_TOKEN}"}
 
-@st.cache_data
 def get_users():
     response = requests.get(f"{API_BASE_URL}/users", headers=HEADERS)
     return response.json()
 
-@st.cache_data
 def get_user(user_id: str):
     response = requests.get(f"{API_BASE_URL}/users/{user_id}", headers=HEADERS)
     return response.json()
+    
 
 def get_questions():
     response = requests.get(f"{API_BASE_URL}/questions", headers=HEADERS)

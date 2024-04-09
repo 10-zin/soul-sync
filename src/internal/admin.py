@@ -26,6 +26,10 @@ async def get_users(db: Session = Depends(get_db)):
 async def get_users(user_id: str, db: Session = Depends(get_db)):
     return crud.get_user(db, user_id)
 
+@router.delete("/users/{user_id}")
+async def remove_user(user_id: str, db: Session = Depends(get_db)):
+    return crud.remove_user(db, user_id)
+
 # See the converation users had with thier AI wingman
 @router.get("/users/{user_id}/conversations")
 async def get_users(user_id: str, db: Session = Depends(get_db)):
