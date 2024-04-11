@@ -3,10 +3,11 @@ import os
 from typing import Dict, List
 from dotenv import load_dotenv
 from openai import OpenAI
+import random
 
 from .models import Message
 from . import schemas
-from .system_prompts import matchmaking_system_prompt
+from .system_prompts import matchmaking_system_prompt_a, matchmaking_system_prompt_b
 
 load_dotenv()
 
@@ -14,6 +15,9 @@ client = OpenAI(
     # This is the default and can be omitted
     api_key=os.environ.get("OPENAI_API_KEY"),
 )
+
+def get_random_matchmaking_system_prompt():
+    return random.choice([(0, matchmaking_system_prompt_a), (1, matchmaking_system_prompt_b)])
 
 def generate_system_prompt(first_name: str):
     return f"""
@@ -98,6 +102,7 @@ def get_ai_match_recommendations(
 ):
 
     matching_content = f"user1 conversation history :\n{user_conversation}\n\nuser2 conversation history :\n{candidate_conversation}"
+    system_prompt_type, matchmaking_system_prompt = get_random_matchmaking_system_prompt()
     messages = [{"role": "system", "content": matchmaking_system_prompt}] + [
         {
             "role": "user",
@@ -121,6 +126,7 @@ def get_ai_match_recommendations(
         user_id=candidate_profile.user_id,
         score=match_result["Final"]["Score"],
         reasoning=match_result["Final"]["Reasoning"],
+        system_prompt_type=system_prompt_type
     )
 
     return match_result

@@ -245,3 +245,18 @@ def remove_question(db: Session, question_id: UUID):
         db.delete(db_question)
         db.commit()
     return db_question
+
+def create_matchmaking_result(db, user_id, match_result: schemas.MatchmakingResult):
+    num_existing_results = db.query(models.MatchmakingCounter).filter(models.MatchmakingCounter.user_id == user_id).first()
+    
+    result = models.MatchmakingResult(
+        candidate_user_id=user_id,
+        match_score=match_result.score,
+        reasoning=match_result.reasoning,
+        system_prompt_type=match_result.system_prompt_type,
+        counter=num_existing_results+1
+    )
+    db.add(result)
+    db.commit()
+    db.refresh(result)
+
