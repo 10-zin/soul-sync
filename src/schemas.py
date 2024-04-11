@@ -194,3 +194,4 @@ class MatchmakingResult(BaseModel):
     user_id: UUID
     score: float
     reasoning: str
+    system_prompt_type: int

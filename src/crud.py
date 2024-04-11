@@ -82,10 +82,10 @@ def get_user_profile(db: Session, user_id: UUID):
     )
 
 
-def get_all_user_profiles_except_current(db: Session, current_user_id: int):
+def get_all_users_except_current(db: Session, current_user_id: int):
     return (
-        db.query(models.UserProfile)
-        .filter(models.UserProfile.user_id != current_user_id)
+        db.query(models.User)
+        .filter(models.User.id != current_user_id)
         .all()
     )
 
@@ -251,3 +251,39 @@ def remove_question(db: Session, question_id: UUID):
         db.delete(db_question)
         db.commit()
     return db_question
+
+def get_existing_counter(db, user_id) -> models.MatchmakingCounter:
+    return db.query(models.MatchmakingCounter).filter(models.MatchmakingCounter.user_id == user_id).first()
+
+def create_matchmaking_counter(db, user_id):
+    counter = models.MatchmakingCounter(user_id=user_id, counter=0)
+    db.add(counter)
+    db.commit()
+    db.refresh(counter)
+
+
+def increment_counter_by_id(db_session: Session, user_id: UUID) -> None:
+    matchmaking_counter = db_session.query(models.MatchmakingCounter).filter(models.MatchmakingCounter.user_id == user_id).first()
+    
+    if matchmaking_counter:
+        # Increment the counter if the entry is found
+        matchmaking_counter.counter += 1
+        db_session.commit()
+
+def create_matchmaking_result(db, user_id, match_result: schemas.MatchmakingResult, counter):
+    
+    result = models.MatchmakingResult(
+        user_id=user_id,
+        match_score=match_result.score,
+        reasoning=match_result.reasoning,
+        system_prompt_type=match_result.system_prompt_type,
+        counter=counter+1
+    )
+    
+    db.add(result)
+    db.commit()
+    db.refresh(result)
+    
+    
+    
+
