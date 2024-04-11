@@ -429,6 +429,8 @@ def matchmaking(
             candidate_conversation=candidate_conversations,
         )
         # print(match_result)
+        crud.create_matchmaking_result(db, current_user.id, match_result)
+
 
         results.append(match_result)
 
