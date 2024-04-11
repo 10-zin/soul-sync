@@ -132,15 +132,13 @@ class MatchmakingResult(Base):
     reasoning = Column(Text)
     system_prompt_type = Column(Integer)  # Field for system prompt type
     counter = Column(Integer)
-    profile = relationship("UserProfile", back_populates="MatchmakingResult", uselist=False)
 
 class MatchmakingCounter(Base):
     __tablename__ = "matchmaking_counter"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id')) 
-    counter = Column(Integer)
-    matchmaking_result = relationship("MatchmakingResult", back_populates="MatchmakingCounter", uselist=False)
+    counter = Column(Integer, default=0, nullable=False)
 
     
     

@@ -397,16 +397,19 @@ def matchmaking(
     candidates_users = crud.get_all_users_except_current(
         db, current_user_id=current_user.id
     )
-    dummy_candidate_users = ["f53ed886-2d61-4ab2-9326-2a3aad7a42f5", "b038d826-1720-41df-872a-dbc04055323e", "c521f185-2d73-44c1-86f6-790603a82bac", "868e66e0-66a4-487f-ab29-ef70b9d2217d"]
+
+    dummy_candidate_users = ["f53ed886-2d61-4ab2-9326-2a3aad7a42f5", "b038d826-1720-41df-872a-dbc04055323e", "c521f185-2d73-44c1-86f6-790603a82bac", "868e66e0-66a4-487f-ab29-ef70b9d2217d", "00c8d448-d533-4c90-8b2e-1b4e1bd03ee1"]
     candidates_users = [crud.get_user(db, dummy_user_id) for dummy_user_id in dummy_candidate_users]
     
-
-    print("num of candidate profiles", len(candidates_users))
+    # maintaining counter to label latest matchmaking result (the counter value wrt user-id)
+    if not crud.get_existing_counter(db, current_user.id):
+            crud.create_matchmaking_counter(db, current_user.id)
+    curr_counter = crud.get_existing_counter(db, current_user.id)
+    
     for candidate_user in candidates_users:
         # print('matching once..')
         candidate_user_profile = crud.get_user_profile(db, candidate_user.id)
         if not candidate_user_profile:
-            # print(f"no user profile for id {candidate_user.id}, skipping..")
             continue
 
         candidate_conversation_data = crud.get_conversations_by_participant_id(
@@ -416,12 +419,6 @@ def matchmaking(
         candidate_conversations = _get_conversation_history(
             db, candidate_conversation_data
         )
-        # print(candidate_conversations)
-
-        # print(f'fetching candidate with {candidate_user.id}')
-
-        
-        # print("fetched", candidate_user_profile.first_name)
 
         match_result = get_ai_match_recommendations(
             user_conversation=current_user_conversations,
@@ -429,10 +426,11 @@ def matchmaking(
             candidate_conversation=candidate_conversations,
         )
         # print(match_result)
-        crud.create_matchmaking_result(db, current_user.id, match_result)
-
+        crud.create_matchmaking_result(db, current_user.id, match_result, curr_counter.counter)
 
         results.append(match_result)
+        
+    crud.increment_counter_by_id(db, current_user.id)
 
     return results
 
