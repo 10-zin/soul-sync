@@ -369,8 +369,9 @@ def _get_conversation_history(db, user_conversations_data):
     user_conversations = []
     for user_conversation in user_conversations_data:
         messages = crud.get_messages(db, conversation_id=user_conversation.id)[::-1]
+        messages_content = [msg.content for msg in messages]
         user_conversations.append(
-            {"conversation_id": user_conversation.id, "messages": messages}
+            {"conversation_id": user_conversation.id, "messages": messages_content}
         )
     return user_conversations
 
@@ -386,28 +387,48 @@ def matchmaking(
     current_user_conversations_data = crud.get_conversations_by_participant_id(
         db, current_user.participant.id
     )
+    # print(current_user_conversations_data)
     current_user_conversations = _get_conversation_history(
         db, current_user_conversations_data
     )
+    # print(current_user_conversations)
 
     # candidate user conversation history and matching for each with current user
-    candidates_profiles = crud.get_all_user_profiles_except_current(
+    candidates_users = crud.get_all_users_except_current(
         db, current_user_id=current_user.id
     )
-    for candidate_profile in candidates_profiles:
+    dummy_candidate_users = ["f53ed886-2d61-4ab2-9326-2a3aad7a42f5", "b038d826-1720-41df-872a-dbc04055323e", "c521f185-2d73-44c1-86f6-790603a82bac", "868e66e0-66a4-487f-ab29-ef70b9d2217d"]
+    candidates_users = [crud.get_user(db, dummy_user_id) for dummy_user_id in dummy_candidate_users]
+    
+
+    print("num of candidate profiles", len(candidates_users))
+    for candidate_user in candidates_users:
+        # print('matching once..')
+        candidate_user_profile = crud.get_user_profile(db, candidate_user.id)
+        if not candidate_user_profile:
+            # print(f"no user profile for id {candidate_user.id}, skipping..")
+            continue
 
         candidate_conversation_data = crud.get_conversations_by_participant_id(
-            db, candidate_profile.user_id
+            db, candidate_user.participant.id
         )
+        # print(candidate_conversation_data)
         candidate_conversations = _get_conversation_history(
             db, candidate_conversation_data
         )
+        # print(candidate_conversations)
+
+        # print(f'fetching candidate with {candidate_user.id}')
+
+        
+        # print("fetched", candidate_user_profile.first_name)
 
         match_result = get_ai_match_recommendations(
             user_conversation=current_user_conversations,
-            candidate_profile=candidate_profile,
+            candidate_profile=candidate_user_profile,
             candidate_conversation=candidate_conversations,
         )
+        # print(match_result)
 
         results.append(match_result)
 

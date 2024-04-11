@@ -76,10 +76,10 @@ def get_user_profile(db: Session, user_id: UUID):
     )
 
 
-def get_all_user_profiles_except_current(db: Session, current_user_id: int):
+def get_all_users_except_current(db: Session, current_user_id: int):
     return (
-        db.query(models.UserProfile)
-        .filter(models.UserProfile.user_id != current_user_id)
+        db.query(models.User)
+        .filter(models.User.id != current_user_id)
         .all()
     )
 
