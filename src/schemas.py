@@ -195,3 +195,7 @@ class MatchmakingResult(BaseModel):
     score: float
     reasoning: str
     system_prompt_type: int
+
+class MatchmakingUserRating(BaseModel):
+    candidate_user_id: UUID
+    score: float
