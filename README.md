@@ -97,7 +97,7 @@ curl -X 'GET' \
 ### To get ai wingman matches
 
 ```bash
-curl -X GET "http://localhost:8000/ai_wingman_matches" \
+curl -X POST "http://localhost:8000/ai_wingman_matches" \
      -H "Accept: application/json" \
      -H "Authorization: Bearer your_access_token_here"
 ```    
@@ -111,7 +111,7 @@ curl -X GET "http://localhost:8000/user-profiles/<user_id>"
 ### To update user rating
 
 ```bash
-curl --location 'http://localhost:8000/matchmaking_user_rating' \
+curl -X GET 'http://localhost:8000/matchmaking_user_rating' \
 -H 'Content-Type: application/json' \
 -H 'Authorization: Bearer your_access_token_here' \
 -d '{
