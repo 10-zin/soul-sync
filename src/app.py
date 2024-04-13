@@ -212,7 +212,8 @@ async def ai_wingman_initiate_conversation(
     )
 
     if not available_questions:
-        raise HTTPException(status_code=404, detail="No new questions available")
+        print("No new questions available. Use a random question")
+        available_questions = db.query(models.Question).all()
 
     # Randomly select a question to ask
     question = random.choice(available_questions)
