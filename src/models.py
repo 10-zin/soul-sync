@@ -123,22 +123,32 @@ class QuestionAsked(Base):
     
     messages_count = Column(Integer, default=0, nullable=False)
 
-class MatchmakingResult(Base):
+class MatchMakingResult(Base):
     __tablename__ = "matchmaking_results"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id')) 
+    candidate_user_id = Column(UUID(as_uuid=True)) 
     match_score = Column(Float)  # Example field, adjust based on what you store for a matchmaking result
     reasoning = Column(Text)
     system_prompt_type = Column(Integer)  # Field for system prompt type
     counter = Column(Integer)
 
-class MatchmakingCounter(Base):
+class MatchMakingCounter(Base):
     __tablename__ = "matchmaking_counter"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id')) 
     counter = Column(Integer, default=0, nullable=False)
+
+class MatchMakingUserRating(Base):
+    __tablename__ = "matchmaking_user_rating"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id')) 
+    candidate_user_id = Column(UUID(as_uuid=True)) 
+    counter = Column(Integer, default=0, nullable=False)
+    score = Column(Integer)
 
     
     

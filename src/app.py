@@ -377,8 +377,8 @@ def _get_conversation_history(db, user_conversations_data):
     return user_conversations
 
 
-@app.get("/ai_wingman_matches", response_model=List[schemas.MatchmakingResult])
-def matchmaking(
+@app.post("/ai_wingman_matches", response_model=List[schemas.MatchmakingResult])
+async def matchmaking(
     current_user: schemas.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -427,7 +427,7 @@ def matchmaking(
             candidate_conversation=candidate_conversations,
         )
         # print(match_result)
-        crud.create_matchmaking_result(db, current_user.id, match_result, curr_counter.counter)
+        crud.create_matchmaking_result(db, current_user.id, candidate_user.id, match_result, curr_counter.counter)
 
         results.append(match_result)
         
@@ -435,9 +435,19 @@ def matchmaking(
 
     return results
 
+@app.post("/matchmaking_user_rating", status_code=status.HTTP_201_CREATED)
+async def create_user_rating(rating: schemas.MatchmakingUserRating, 
+                             current_user: schemas.User = Depends(get_current_user),
+                             db: Session = Depends(get_db)):
+
+    counter=crud.get_existing_counter(db, current_user.id)
+    if not counter:
+        raise HTTPException(status_code=404, detail="User Match Making Counter not found")
+    crud.create_matchmaking_user_rating(db, current_user.id, rating.candidate_user_id, counter.counter, rating.score)
+    return {"message": "Rating stored successfully"}
 
 @app.get("/user-profiles/{user_id}", response_model=schemas.UserProfile)
-def get_user_profile(user_id: UUID, db: Session = Depends(get_db)):
+async def get_user_profile(user_id: UUID, db: Session = Depends(get_db)):
     user_profile = crud.get_user_profile(db, user_id=user_id)
     if user_profile:
         return user_profile
