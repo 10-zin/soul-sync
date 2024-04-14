@@ -111,7 +111,7 @@ curl -X GET "http://localhost:8000/user-profiles/<user_id>"
 ### To update user rating
 
 ```bash
-curl -X GET 'http://localhost:8000/matchmaking_user_rating' \
+curl -X POST 'http://localhost:8000/matchmaking_user_rating' \
 -H 'Content-Type: application/json' \
 -H 'Authorization: Bearer your_access_token_here' \
 -d '{
