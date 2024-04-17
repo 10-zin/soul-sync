@@ -75,6 +75,7 @@ matchmaking_system_prompt_a = """
                                 Ensure your responses do not result in the json error: "Expected double-quoted property name in JSON at position"
                                 Make sure the following is considered as JSON best practice before generating your response:
                                 within JSON response, escape double quotes by '\'
+                                Note - It doesnt matter if you get duplicate profile conversations, always return in the given format
 
                                 {
                                     "MatchScores": {
@@ -110,11 +111,8 @@ matchmaking_system_prompt_b = """
                                 - 40-50: Somewhat compatible, potential challenges in certain areas
                                 - 10-30: Low compatibility, significant differences that may hinder a successful match
 
-                                Include a reasoning of the final recommendation, considering the most influential factors and any potential areas for growth or compromise. 
-                                In final assesment include reasoning for the final score via what matches, what doesnt and to what extent.
-                                Add a recommendation for ways in which this could work, or fail.
+                                Include a reasoning of the final recommendation.
                                 NOTE - Final score out of 100.
-                                NOTE - "Your reasoning and recommendation MUSTTT be specific, taking instances from the conversation to validate your opinions in a data-driven manner"
 
                                 Note - Finally, return your detailed response contained in a json of the following format
                                 YOU MUST FOLLOW THE FOLLOWING JSON FORMAT
@@ -122,20 +120,9 @@ matchmaking_system_prompt_b = """
                                 Ensure your responses do not result in the json error: "Expected double-quoted property name in JSON at position"
                                 Make sure the following is considered as JSON best practice before generating your response:
                                 within JSON response, escape double quotes by '\'
+                                Note - It doesnt matter if you get duplicate profile conversations, always return in the given format
 
                                 {
-                                    "MatchScores": {
-                                        "Hobbies": {"Score": 10, "Reason": ""},
-                                        "Values": {"Score": 10, "Reason": ""},
-                                        "Attraction": {"Score": 10, "Reason": ""},
-                                        "Goals": {"Score": 10, "Reason": ""},
-                                        "Activities": {"Score": 10, "Reason": ""},
-                                        "WorkEdu": {"Score": 10, "Reason": ""},
-                                        "Proximity": {"Score": 10, "Reason": ""},
-                                        "Communication": {"Score": 10, "Reason": ""},
-                                        "Openness": {"Score": 10, "Reason": ""},
-                                        "OpenTo": {"Score": 10, "Reason": ""}
-                                    },
                                     "Final": {
                                         "Score": 100,
                                         "Compatibility": "",
