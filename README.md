@@ -121,10 +121,10 @@ curl -X POST 'http://localhost:8000/matchmaking_user_rating' \
 ```
 
 ## Deployment
-### To build the image
-Remember to update the tag to the latest version.
-`docker build --platform=linux/amd64 -t docker.io/ruizehung/soulsync:v1.2 .`
+### Install Fly.io CLI 
+See https://fly.io/docs/hands-on/install-flyctl/
+`fly auth login`
 
-### To push the image
-`docker push docker.io/ruizehung/soulsync:v1.2`
+### Install Fly.io CLI 
+`fly deploy`
 
