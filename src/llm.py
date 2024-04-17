@@ -97,11 +97,12 @@ def get_ai_response(
 
 def get_ai_match_recommendations(
     user_conversation: List[Dict[str, str]],
+    current_user_profile,
     candidate_profile,
     candidate_conversation: List[Dict[str, str]],
 ):
 
-    matching_content = f"user1 conversation history :\n{user_conversation}\n\nuser2 conversation history :\n{candidate_conversation}"
+    matching_content = f"{current_user_profile.first_name} conversation history :\n{user_conversation}\n\n{candidate_profile.first_name} conversation history :\n{candidate_conversation}"
     system_prompt_type, matchmaking_system_prompt = get_random_matchmaking_system_prompt()
     messages = [{"role": "system", "content": matchmaking_system_prompt}] + [
         {

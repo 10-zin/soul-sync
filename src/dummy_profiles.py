@@ -1,0 +1,1 @@
+dummy_candidate_users = ["1a70bb81-a5fb-46c7-9481-7b65fb28655a", "ad6263f4-630e-4007-8d0d-151b287ac5f1", "5ff19667-03ec-4626-bbae-f269b5ecc116", "2ed3b4e9-ce6d-4cb1-a750-23b0e09927d6", "6f7076e1-52dc-4508-a1b2-f8dcd46bd877"]

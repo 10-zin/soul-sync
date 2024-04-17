@@ -14,6 +14,7 @@ import base64
 
 
 from . import models, schemas, crud
+from .dummy_profiles import dummy_candidate_users
 from .auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     ALGORITHM,
@@ -392,14 +393,14 @@ async def matchmaking(
     current_user_conversations = _get_conversation_history(
         db, current_user_conversations_data
     )
+    current_user_profile = crud.get_user_profile(db, current_user.id)
     # print(current_user_conversations)
 
     # candidate user conversation history and matching for each with current user
     candidates_users = crud.get_all_users_except_current(
         db, current_user_id=current_user.id
     )
-
-    dummy_candidate_users = ["f53ed886-2d61-4ab2-9326-2a3aad7a42f5", "b038d826-1720-41df-872a-dbc04055323e", "c521f185-2d73-44c1-86f6-790603a82bac", "868e66e0-66a4-487f-ab29-ef70b9d2217d", "00c8d448-d533-4c90-8b2e-1b4e1bd03ee1"]
+    
     candidates_users = [crud.get_user(db, dummy_user_id) for dummy_user_id in dummy_candidate_users]
     
     # maintaining counter to label latest matchmaking result (the counter value wrt user-id)
@@ -423,6 +424,7 @@ async def matchmaking(
 
         match_result = get_ai_match_recommendations(
             user_conversation=current_user_conversations,
+            current_user_profile=current_user_profile,
             candidate_profile=candidate_user_profile,
             candidate_conversation=candidate_conversations,
         )
