@@ -120,11 +120,18 @@ curl -X POST 'http://localhost:8000/matchmaking_user_rating' \
 }'
 ```
 
-## Deployment
+## Deployment 
 ### Install Fly.io CLI 
 See https://fly.io/docs/hands-on/install-flyctl/
 `fly auth login`
 
-### Install Fly.io CLI 
+#### Backend
 `fly deploy`
 
+#### Admin dashboard
+```
+docker build --platform=linux/amd64 -f Dockerfile_Admin -t docker.io/ruizehung/soulsync-admin:v1.0 .
+docker push docker.io/ruizehung/soulsync-admin:v1.0
+cd admin_dashboard
+fly deploy
+```

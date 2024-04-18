@@ -4,6 +4,10 @@ from utils import get_conversation, get_user
 
 st.set_page_config(layout="wide")
 
+if "password_correct" not in st.session_state or not st.session_state["password_correct"]:
+    st.title('Please Login First!')    
+    st.stop()
+
 st.title('Conversations Dashboard')
 
 user_id = st.text_input('Enter User ID')

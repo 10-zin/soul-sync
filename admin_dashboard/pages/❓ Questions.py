@@ -25,6 +25,10 @@ def remove_question():
         else:
             st.error("Failed to remove the question")
 
+if "password_correct" not in st.session_state or not st.session_state["password_correct"]:
+    st.title('Please Login First!')    
+    st.stop()
+
 st.title('Questions Dashboard')
 
 # Display existing questions

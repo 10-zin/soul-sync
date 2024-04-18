@@ -7,6 +7,7 @@ load_dotenv()
 
 API_BASE_URL = os.getenv("API_BASE_URL")
 ADMIN_API_TOKEN = os.getenv("ADMIN_API_TOKEN")
+GLOBAL_PASSWORD = os.getenv("GLOBAL_PASSWORD")
 
 HEADERS = {"Authorization": f"token {ADMIN_API_TOKEN}"}
 

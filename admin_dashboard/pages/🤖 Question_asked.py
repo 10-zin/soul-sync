@@ -6,6 +6,9 @@ from utils import get_question_asked_instances
 
 st.set_page_config(layout="wide")
 
+if "password_correct" not in st.session_state or not st.session_state["password_correct"]:
+    st.title('Please Login First!')    
+    st.stop()
 
 st.title('Question Metrics')
 

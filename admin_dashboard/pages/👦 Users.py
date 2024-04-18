@@ -4,9 +4,11 @@ import streamlit as st
 
 from utils import API_BASE_URL, HEADERS, get_users
 
-
 st.set_page_config(layout="wide")
 
+if "password_correct" not in st.session_state or not st.session_state["password_correct"]:
+    st.title('Please Login First!')    
+    st.stop()
 
 st.title('Users Dashboard')
 
