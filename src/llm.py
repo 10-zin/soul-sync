@@ -2,7 +2,7 @@ import json
 import os
 from typing import Dict, List
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI
 import random
 
 from .models import Message
@@ -15,6 +15,7 @@ client = OpenAI(
     # This is the default and can be omitted
     api_key=os.environ.get("OPENAI_API_KEY"),
 )
+async_client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 def get_random_matchmaking_system_prompt():
     return random.choice([(0, matchmaking_system_prompt_a), (1, matchmaking_system_prompt_b)])
@@ -95,7 +96,7 @@ def get_ai_response(
     return ai_message
 
 
-def get_ai_match_recommendations(
+async def get_ai_match_recommendations(
     user_conversation: List[Dict[str, str]],
     current_user_profile,
     candidate_profile,
@@ -111,7 +112,7 @@ def get_ai_match_recommendations(
         }
     ]
 
-    response = client.chat.completions.create(
+    response = await async_client.chat.completions.create(
         messages=messages,
         model="gpt-4-turbo-preview",
         response_format={"type":"json_object"}

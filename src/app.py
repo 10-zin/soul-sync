@@ -422,13 +422,12 @@ async def matchmaking(
             db, candidate_conversation_data
         )
 
-        match_result = get_ai_match_recommendations(
+        match_result = await get_ai_match_recommendations(
             user_conversation=current_user_conversations,
             current_user_profile=current_user_profile,
             candidate_profile=candidate_user_profile,
             candidate_conversation=candidate_conversations,
         )
-        # print(match_result)
         crud.create_matchmaking_result(db, current_user.id, candidate_user.id, match_result, curr_counter.counter)
 
         results.append(match_result)
