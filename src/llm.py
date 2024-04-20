@@ -11,10 +11,10 @@ from .system_prompts import matchmaking_system_prompt_a, matchmaking_system_prom
 
 load_dotenv()
 
-client = OpenAI(
-    # This is the default and can be omitted
-    api_key=os.environ.get("OPENAI_API_KEY"),
-)
+# client = OpenAI(
+#     # This is the default and can be omitted
+#     api_key=os.environ.get("OPENAI_API_KEY"),
+# )
 async_client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 def get_random_matchmaking_system_prompt():
@@ -70,7 +70,7 @@ def generate_system_prompt(first_name: str):
 # """
 
 
-def get_ai_response(
+async def get_ai_response(
     db_messages: List[Message],
     ai_participant_id: str,
     user: schemas.User,
@@ -85,7 +85,7 @@ def get_ai_response(
         for msg in db_messages
     ]
 
-    response = client.chat.completions.create(
+    response = await async_client.chat.completions.create(
         messages=messages,
         model="gpt-4-turbo-preview",
     )

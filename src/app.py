@@ -273,7 +273,7 @@ async def ai_wingman_conversation(
         db, conversation_id=message.conversation_id, skip=0, limit=100
     )
     db_messages.sort(key=lambda x: x.created_at)
-    ai_message_content = get_ai_response(
+    ai_message_content = await get_ai_response(
         db_messages,
         db_ai_wingman_participant_id,
         current_user,
