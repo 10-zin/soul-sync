@@ -13,8 +13,8 @@ Base = declarative_base()
 # Define the association table for conversations and participants
 conversation_participant_association = Table(
     'conversation_participant_association', Base.metadata,
-    Column('conversation_id', UUID(as_uuid=True), ForeignKey('conversations.id')),
-    Column('participant_id', UUID(as_uuid=True), ForeignKey('participants.id'))
+    Column('conversation_id', UUID(as_uuid=True), ForeignKey('conversations.id', ondelete="CASCADE")),
+    Column('participant_id', UUID(as_uuid=True), ForeignKey('participants.id', ondelete="CASCADE"))
 )
 
 class ParticipantType(enum.Enum):
@@ -26,7 +26,7 @@ class Participant(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
     type = Column(Enum(ParticipantType))  # Could be 'user' or 'ai_wingman'
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete="CASCADE"), nullable=True)
     user = relationship("User", back_populates="participant", uselist=False)
     ai_wingman_id = Column(UUID(as_uuid=True), ForeignKey('ai_wingmen.id'), nullable=True)
     ai_wingman = relationship("AIWingman", back_populates="participant", uselist=False)
@@ -53,7 +53,7 @@ class UserProfile(Base):
     __tablename__ = "user_profiles"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), unique=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), unique=True)
     
     first_name = Column(String)
     last_name = Column(String)
@@ -89,12 +89,12 @@ class Message(Base):
     __tablename__ = "messages"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
-    conversation_id = Column(UUID(as_uuid=True), ForeignKey("conversations.id"))
+    conversation_id = Column(UUID(as_uuid=True), ForeignKey("conversations.id", ondelete="CASCADE"))
     conversation = relationship("Conversation", back_populates="messages")
     content = Column(Text)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
-    sender_id = Column(UUID(as_uuid=True), ForeignKey("participants.id"))
+    sender_id = Column(UUID(as_uuid=True), ForeignKey("participants.id", ondelete="CASCADE"))
     sender = relationship("Participant", back_populates="messages")
     
     
@@ -113,7 +113,7 @@ class Question(Base):
 class QuestionAsked(Base):
     __tablename__ = 'questions_asked'
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'))
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete="CASCADE"))
     question_id = Column(UUID(as_uuid=True), ForeignKey('questions.id'))
     conversation_id = Column(UUID(as_uuid=True), ForeignKey('conversations.id'))
     asked_at = Column(DateTime, default=datetime.now(timezone.utc))
@@ -127,7 +127,7 @@ class MatchMakingResult(Base):
     __tablename__ = "matchmaking_results"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id')) 
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete="CASCADE")) 
     candidate_user_id = Column(UUID(as_uuid=True)) 
     match_score = Column(Float)  # Example field, adjust based on what you store for a matchmaking result
     reasoning = Column(Text)
@@ -138,14 +138,14 @@ class MatchMakingCounter(Base):
     __tablename__ = "matchmaking_counter"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id')) 
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete="CASCADE")) 
     counter = Column(Integer, default=0, nullable=False)
 
 class MatchMakingUserRating(Base):
     __tablename__ = "matchmaking_user_rating"
 
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True, nullable=False)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id')) 
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete="CASCADE")) 
     candidate_user_id = Column(UUID(as_uuid=True)) 
     counter = Column(Integer, default=0, nullable=False)
     score = Column(Integer)
