@@ -114,7 +114,7 @@ async def get_ai_match_recommendations(
 
     response = await async_client.chat.completions.create(
         messages=messages,
-        model="gpt-4-turbo-preview",
+        model="gpt-4-turbo",
         response_format={"type":"json_object"}
     )
     response_content = json.loads(response.json())["choices"][0]["message"]["content"]
