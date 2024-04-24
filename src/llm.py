@@ -124,6 +124,13 @@ async def get_ai_match_recommendations(
     except Exception as e:
         print(f"JSON error: {e}\n\nResponse content:\n{response_content}\n-----")
         match_result = {"error": "Failed to parse match result"}
+    
+    try:
+        match_result["Final"]["Score"] = float(match_result["Final"]["Score"])
+    except Exception as e:
+        print(f"Score parsing error: {e}\n\nMatch result:\n{match_result}\n-----")
+        match_result["Final"]["Score"] = 0.0
+    
     match_result = schemas.MatchmakingResult(
         user_id=candidate_profile.user_id,
         score=match_result["Final"]["Score"],
