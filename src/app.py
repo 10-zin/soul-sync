@@ -405,7 +405,7 @@ async def matchmaking(
     
     # maintaining counter to label latest matchmaking result (the counter value wrt user-id)
     if not crud.get_existing_counter(db, current_user.id):
-            crud.create_matchmaking_counter(db, current_user.id)
+        crud.create_matchmaking_counter(db, current_user.id)
     curr_counter = crud.get_existing_counter(db, current_user.id)
     
     for candidate_user in candidates_users:

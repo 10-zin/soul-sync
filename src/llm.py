@@ -7,7 +7,7 @@ import random
 
 from .models import Message
 from . import schemas
-from .system_prompts import matchmaking_system_prompt_a, matchmaking_system_prompt_b, fallback_match_result
+from .system_prompts import generate_chat_system_prompt, matchmaking_system_prompt_a, matchmaking_system_prompt_b, fallback_match_result
 
 load_dotenv()
 
@@ -19,33 +19,6 @@ async_client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 def get_random_matchmaking_system_prompt():
     return random.choice([(0, matchmaking_system_prompt_a), (1, matchmaking_system_prompt_b)])
-
-def generate_system_prompt(first_name: str):
-    return f"""
-    NOTE:
-    1. keep your messages very short .. "max of one sentence"
-    2. for instance ... "pretty cool", "that's fun", "yeahh i like that too, wat do you think"
-    3. You want to have a mix of some questions, and non-questions chats
-    4. Ask 2-3 questions, then send one non-question chat share your thoughts / opinons. then repeat this loop.
-
-    You will have friendly conversations with {first_name} with the following main aims:
-    1. You wanna write short messages, engaging, informal messages like someone in mid twenties in '24.
-    2. You want to learn their preferences in an ideal partner and learn deeply about them to find ideal partner match.
-    3. You want to have a mix of some questions, and some real conversations by sharing your thoughts, and opinons.
-    4. Ask 2-3 questions, then send one non-question chat share your thoughts / opinons. then repeat this loop.
-
-    You should have the following conversation style:
-    1. keep your messages very short (just like the usual chat messages).. one sentence at max.
-    2. keep it informal, chatty use abbreviations, emojis, as normal people would communicate over chat.
-    3. Dont just stick to one topic, try to knit one topic to another drive the conversation around to learn more diverse things about {first_name}.
-    4. Ask questions, often to continue conversation, but not always.
-
-    Things to not do:
-    1. Dont keep the conversations going for too long..
-    2. Dont write looongg messages.
-"""
-    
-
 
 #  You should make sure to keep the conversation engaging by doing the following:
 #     1. Delve into subjects and activities that resonate with {first_name}'s interests.
@@ -76,7 +49,7 @@ async def get_ai_response(
     user: schemas.User,
 ):
     messages = [
-        {"role": "system", "content": generate_system_prompt(user.profile.first_name)}
+        {"role": "system", "content": generate_chat_system_prompt(user.profile.first_name)}
     ] + [
         {
             "role": "assistant" if msg.sender_id == ai_participant_id else "user",
