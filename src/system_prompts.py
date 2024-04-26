@@ -131,4 +131,15 @@ matchmaking_system_prompt_b = """
                                     }
                                 }
                             """
-
+fallback_score = 30
+fallback_reasoning = """Individuals exhibit a mix of common interests and differing passions, suggesting a balanced potential for connection.
+Shared activities may provide common ground, yet contrasting life goals and philosophies could challenge the depth of their compatibility.
+Ultimately, the richness of their interaction may depend on their willingness to embrace both the similarities and the unique differences they each bring to the relationship."""
+fallback_match_result = {
+                            "Final": {
+                                "Score": fallback_score,
+                                "Compatibility": "",
+                                "Reasoning": fallback_reasoning,
+                                "Recommendation": ""
+                            }
+                        }

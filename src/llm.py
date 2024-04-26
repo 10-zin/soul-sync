@@ -7,7 +7,7 @@ import random
 
 from .models import Message
 from . import schemas
-from .system_prompts import matchmaking_system_prompt_a, matchmaking_system_prompt_b
+from .system_prompts import matchmaking_system_prompt_a, matchmaking_system_prompt_b, fallback_match_result
 
 load_dotenv()
 
@@ -118,13 +118,13 @@ async def get_ai_match_recommendations(
         response_format={"type":"json_object"}
     )
     response_content = json.loads(response.json())["choices"][0]["message"]["content"]
-
     try:
         match_result = json.loads(response_content)
     except Exception as e:
         print(f"JSON error: {e}\n\nResponse content:\n{response_content}\n-----")
-        match_result = {"error": "Failed to parse match result"}
-    
+        print("returning to fallback match result")
+        match_result=fallback_match_result
+        
     try:
         match_result["Final"]["Score"] = float(match_result["Final"]["Score"])
     except Exception as e:
